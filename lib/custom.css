@@ -1,0 +1,145 @@
+h2 {
+  margin-top: 15px;
+  border-bottom: 1px solid #CCCCCC;
+}
+
+#legend > h2 {
+  border-bottom: 0px;
+}
+
+.label, .label:hover {
+}
+
+.flags {
+  float: right;
+}
+
+li {
+  margin: 2px;
+}
+
+li.feature {
+  border-radius: 4px;
+  padding: 3px;
+}
+
+li.feature:hover {
+  background-color: whiteSmoke;
+}
+
+div.feature {
+  margin-bottom: 20px;
+}
+
+.feature > .name {
+  border-radius: 4px;
+  font-weight: bold;
+  margin-right: 5px;
+  padding: 3px;
+}
+
+.feature > .description {
+  padding: 3px;
+}
+
+.feature > .name:hover {
+  background-color: whiteSmoke;
+}
+
+.feature .elements, .feature .jira-issues {
+  padding: 3px 3px 3px 25px;
+}
+
+.feature .element {
+  margin-bottom: 10px;
+}
+
+.feature .element .header .type,
+.jira-issues .header {
+  font-weight: bold;
+}
+
+.steps,
+.jira-issues .list {
+  margin-left: 20px;
+}
+
+li.step {
+  border-radius: 4px;
+  padding: 3px;
+}
+
+li.step:hover {
+  background-color: whiteSmoke;
+}
+
+li.step.outline:hover {
+  background-color: transparent;
+}
+
+li.step table {
+  margin-top: 3px;
+  margin-bottom: 0px;
+}
+
+.element .examples {
+  margin-left: 30px;
+}
+
+.feature .element .examples .header .type {
+  font-weight: normal;
+  text-decoration: underline;
+}
+
+.doc-string {
+  margin-top: 3px;
+}
+
+.jira-issues .list {
+  margin-left: 35px;
+}
+
+.jira-issues .list .label {
+  font-size: 9px;
+}
+
+.jira-issues .list a .label {
+  background-color: #CCCCCC;
+}
+
+code {
+  padding: 2px 3px;
+  font-size: 11px;
+}
+
+/* the overlayed element */
+.simple_overlay {
+
+    /* must be initially hidden */
+    display:none;
+
+    /* place overlay on top of other elements */
+    z-index:10000;
+
+    /* styling */
+    background-color:#333;
+
+    width:675px;
+    min-height:200px;
+    border:1px solid #666;
+
+    /* CSS3 styling for latest browsers */
+    -moz-box-shadow:0 0 90px 5px #000;
+    -webkit-box-shadow: 0 0 90px #000;
+}
+
+/* close button positioned on upper right corner */
+.simple_overlay .close {
+    background-image:url(../img/close.png);
+    position:absolute;
+    right:-15px;
+    top:-15px;
+    cursor:pointer;
+    height:35px;
+    width:35px;
+}

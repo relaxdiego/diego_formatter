@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Features Report</title>
+  <%= asset_tags %>
+</head>
+<div class="container">
+  <h1>Features Report</h1>
+  <p>Last updated: <%= Time.now.utc %></p>
+
+  <div class="row">
+    <div id="summary" class="span12">
+      <h2>Summary</h2>
+      <ul>
+        <li><%= total_completed_features %> out of <%= total_features %> features have been completed.</li>
+        <% if total_undefined_features > 0 %>
+          <li><%= total_undefined_features %> features are not yet fully spec'd out.</li>
+        <% else %>
+          <li>All features are fully spec'd out.</li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <div id="legend" class="span12">
+      <h2>Legend</h2>
+      <table class="table table-condensed">
+        <% [:passed, :failed, :undefined, :pending, :skipped].each do |status| %>
+        <tr>
+          <td><span class="label <%= label_type(status) %>"><%= status_text(status) %></span></td>
+          <td>
+            <%= case status
+                when :passed
+                  "The feature is fully implemented and validated."
+                when :failed
+                  "The feature has one or more steps that failed."
+                when :undefined
+                  "Undefined. The feature has one or more steps that don't have an underlying validator."
+                when :pending
+                  "Pending. The feature's underlying validator is still being built."
+                when :skipped
+                  "Skipped. One or more steps of the feature was skipped."
+                end
+            %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <div id="toc" class="span12">
+      <h2>Table of Features</h2>
+      <ol>
+      <% @results.keys.sort{ |a, b| a <=> b}.each do |category| %>
+        <li>
+          <%= category.humanize %>
+          <ul>
+            <% @results[category].each do |feature| %>
+              <a href="#<%= build_bookmark(category, feature) %>">
+                <li class="feature <%= all_tags(feature).map{|t| t.gsub /^@/, 'tag-'}.join(' ') %>">
+                  <%= feature[:name] %>
+                  <span class="flags">
+                    <span class="label <%= feature_label_type(feature) %>"><%= feature_status_text(feature) %></span>
+                  </span>
+                </li>
+              </a>
+            <% end %>
+          </ul>
+        </li>
+      <% end %>
+      </ol>
+    </div><!-- id="toc" -->
+  </div><!-- class="row" -->
+
+  <div class="row">
+    <div id="features" class="span12">
+      <h2>Features</h2>
+      <% @results.keys.sort{ |a, b| a<=>b}.each do |category| %>
+        <h3><%= category.humanize %></h3>
+        <% @results[category].each do |feature| %>
+          <div class="feature <%= all_tags(feature).map{|t| t.gsub /^@/, 'tag-'}.join(' ') %>">
+            <div class="name">
+              <a name="<%= build_bookmark(category, feature) %>"><%= feature[:name] %></a>
+              <% non_jira_tags(feature).each do |tag| %>
+                <span class="label label-info"><%= tag %></span>
+              <% end %>
+              <span class="flags">
+                <span class="label <%= feature_label_type(feature) %>"><%= feature_status_text(feature) %></span>
+              </span>
+            </div>
+            <div class="description"><%= feature[:description] %></div>
+            <div class="jira-issues">
+              <div class="header">Related Jira Issues:</div>
+              <div class="list">
+                <% if has_jira_tags?(feature) %>
+                  <% jira_tags(feature).each do |tag| %>
+                    <a href='https://issues.morphlabs.com/browse/<%= tag.gsub(/^@jira-/, '') %>' target='__jira__'><span class="label"><%= tag.gsub(/^@jira-/, '') %></span></a>
+                  <% end %>
+                <% else %>
+                  <span class="label label-important">WARNING: No associated Jira issue</span>
+                <% end %>
+              </div>
+            </div>
+            <% if feature[:elements] %>
+            <div class="elements">
+              <% feature[:elements].each do |element| %>
+                <div class="element">
+                  <div class="header">
+                    <span class="type"><%= element[:type] %>:</span>
+                    <span class="name"><%= element[:name] %>
+                    <% non_jira_tags(element).each do |tag| %>
+                      <span class="label label-info"><%= tag %></span>
+                    <% end %>
+                    </span>
+                    <br>
+                    <span class="description"><%= element[:description] %></span>
+                  </div>
+
+                  <div class="steps">
+                    <ul>
+                      <% element[:steps].each do |step| %>
+                        <li class="step <%= "outline" if is_scenario_outline?(element) %>">
+                          <% unless step[:keyword].empty? %>
+                          <span class="keyword"><%= step[:keyword] %></span>
+                          <% end %>
+                          <span class="name"><%= step[:name] %></span>
+                          <span class="flags">
+                            <% if step[:screenshot] %>
+                              <a rel="#<%= build_id feature[:name], element[:name], step[:name] %>-screenshot"><i class="icon-camera"></i></a>
+                              <div class="simple_overlay" id="<%= build_id feature[:name], element[:name], step[:name] %>-screenshot">
+                                <img src="<%= step[:screenshot] %>">
+                              </div>
+                            <% end %>
+                            <% if step[:exception] %>
+                              <a rel="#<%= build_id feature[:name], element[:name], step[:name] %>-exception"><i class="icon-info-sign"></i></a>
+                              <div class="simple_overlay" id="<%= build_id feature[:name], element[:name], step[:name] %>-exception">
+<pre>
+<%= step[:exception][:message] %>
+<%= step[:exception][:backtrace].join("\n") %>
+<%= step[:exception][:extra_failure_content] %>
+</pre>
+                              </div>
+                            <% end %>
+                            <% unless is_scenario_outline?(element) || step[:status] == :passed %>
+                              <span class="label <%= label_type(step[:status]) %>"><%= status_text(step[:status]) %></span>
+                            <% end %>
+                          </span>
+                          <% if step[:table] %>
+                            <table class="table table-bordered">
+                              <% step[:table].each do |row| %>
+                                <tr>
+                                  <% row.each do |cell| %>
+                                    <td><%= cell[:value] %></td>
+                                  <% end %>
+                                </tr>
+                              <% end %>
+                            </table>
+                          <% end # if step[:table] %>
+                          <% if step[:doc_string] %>
+                            <pre class="doc-string"><%= h step[:doc_string] %></pre>
+                          <% end  # if step[:docstring] %>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </div><!-- class="steps" -->
+
+                  <% if element[:examples] %>
+                    <% element[:examples].each do |example| %>
+                      <div class="examples">
+                      <div class="header">
+                        <span class="type"><%= element[:examples][:type] %>:</span>
+                        <span class="name"><%= element[:examples][:name] %></span><br>
+                        <span class="description"><%= element[:examples][:description] %></span>
+                      </div>
+
+                      <div class="rows">
+                        <table class="table table-bordered">
+                          <tr>
+                          <% element[:examples][:rows][0].each do |header| %>
+                            <td><%= header[:value] %></td>
+                          <% end %>
+                          </tr>
+                          <% (1...element[:examples][:rows].length).each do |index| %>
+                            <tr>
+                              <% element[:examples][:rows][index].each do |cell| %>
+                                <td>
+                                  <%= cell[:value] %>
+                                  <span class="flags">
+                                    <% if cell[:screenshot] %>
+                                      <a rel="#<%= build_id feature[:name], element[:name], cell[:value] %><%= index %>-screenshot"><i class="icon-camera"></i></a>
+                                      <div class="simple_overlay" id="<%= build_id feature[:name], element[:name], cell[:value] %><%= index %>-screenshot">
+                                        <img src="<%= cell[:screenshot] %>">
+                                      </div>
+                                    <% end %>
+                                    <% if cell[:exception] %>
+                                      <a rel="#<%= build_id feature[:name], element[:name], cell[:name] %><%= index %>-exception"><i class="icon-info-sign"></i></a>
+                                      <div class="simple_overlay" id="<%= build_id feature[:name], element[:name], cell[:name] %><%= index %>-exception">
+  <pre>
+  <%= cell[:exception][:message] %>
+  <%= cell[:exception][:backtrace].join("\n") %>
+  <%= cell[:exception][:extra_failure_content] %>
+  </pre>
+                                      </div>
+                                    <% end %>
+                                    <% unless cell[:status] == :passed %>
+                                      <span class="label <%= label_type(cell[:status]) %>"><%= status_text(cell[:status]) %></span>
+                                    <% end %>
+                                  </span>
+                                </td>
+                              <% end %>
+                            </tr>
+                          <% end %>
+                        </table>
+                      </div>
+                    </div>
+                    <% end #element[:examples].each %>
+                  <% end #element[:examples] %>
+                </div>
+              <% end %>
+            </div><!-- class="elements" -->
+            <% end # if feature[:elements] %>
+          </div>
+        <% end # @results[category].each do |feature| %>
+      <% end # @results.keys.sort{ |a, b| a<=>b}.each do |category| %>
+    </div><!-- id="features" -->
+  </div><!-- class="row" -->
+
+</div>
+</html>
