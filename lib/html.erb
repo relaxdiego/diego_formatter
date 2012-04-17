@@ -168,24 +168,24 @@
                   </div><!-- class="steps" -->
 
                   <% if element[:examples] %>
-                    <% element[:examples].each do |example| %>
+                    <% element[:examples].each do |examples| %>
                       <div class="examples">
                       <div class="header">
-                        <span class="type"><%= element[:examples][:type] %>:</span>
-                        <span class="name"><%= element[:examples][:name] %></span><br>
-                        <span class="description"><%= element[:examples][:description] %></span>
+                        <span class="type"><%= examples[:type] %>:</span>
+                        <span class="name"><%= examples[:name] %></span><br>
+                        <span class="description"><%= examples[:description] %></span>
                       </div>
 
                       <div class="rows">
                         <table class="table table-bordered">
                           <tr>
-                          <% element[:examples][:rows][0].each do |header| %>
-                            <td><%= header[:value] %></td>
+                          <% examples[:rows][0].each do |header| %>
+                            <th><%= header[:value] %></th>
                           <% end %>
                           </tr>
-                          <% (1...element[:examples][:rows].length).each do |index| %>
+                          <% (1...examples[:rows].length).each do |index| %>
                             <tr>
-                              <% element[:examples][:rows][index].each do |cell| %>
+                              <% examples[:rows][index].each do |cell| %>
                                 <td>
                                   <%= cell[:value] %>
                                   <span class="flags">

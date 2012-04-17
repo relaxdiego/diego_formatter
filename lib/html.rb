@@ -410,12 +410,14 @@ module Cucumber
           feature[:elements].each do |element|
             if is_scenario_outline?(element)
               # Go through the examples instead of the steps
-              (1...element[:examples][:rows].length).each do |index|
-                element[:examples][:rows][index].each do |cell|
-                  status = cell[:status] unless cell[:status] == :passed
+              element[:examples].each do |examples|
+                (1...examples[:rows].length).each do |index|
+                  examples[:rows][index].each do |cell|
+                    status = cell[:status] unless cell[:status] == :passed
+                    break if status
+                  end
                   break if status
                 end
-                break if status
               end
             else
               # Go through the steps
