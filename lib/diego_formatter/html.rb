@@ -31,7 +31,7 @@ module Cucumber
           @current_category
           @current_feature
 
-          ensure_assets
+          ensure_assets(@report_dir)
 
           FileUtils.rm_rf(screenshots_dir) if Dir.exists?(screenshots_dir)
           Dir.mkdir(screenshots_dir)
