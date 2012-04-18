@@ -8,6 +8,8 @@ require 'cucumber/formatter/html'
 require 'cucumber/formatter/summary'
 require 'active_support/all'
 
+require_relative 'mixins/asset_methods'
+
 module Cucumber
   module Formatter
     module Relaxdiego
@@ -19,6 +21,8 @@ module Cucumber
         include Summary
         include ActiveSupport::Inflector
 
+        include AssetMethods
+
         def initialize(step_mother, path_or_io, options)
           @report_dir = ensure_dir(path_or_io, "html")
           @total_features = 0
@@ -26,6 +30,8 @@ module Cucumber
           @results = {}
           @current_category
           @current_feature
+
+          ensure_assets
 
           FileUtils.rm_rf(screenshots_dir) if Dir.exists?(screenshots_dir)
           Dir.mkdir(screenshots_dir)
@@ -313,37 +319,37 @@ module Cucumber
         protected
 
         def write_html
-          template = File.open(File.expand_path('../html.erb', __FILE__), 'r')
+          template = File.open(File.expand_path('../templates/html.erb', __FILE__), 'r')
           erb = ERB.new(template.read)
           File.open(File.join(@report_dir, "index.html"), 'w') { |file| file.write(erb.result(binding)) }
           puts "HTML report saved as #{@report_dir}/index.html"
         end
 
-        def asset_tags
-          tags = ""
-          destination_dir = File.join(@report_dir, "assets")
-
-          dir = Dir.open(File.dirname(__FILE__))
-
-          Dir.mkdir(destination_dir) unless Dir.exists?(destination_dir)
-
-          dir.entries.select { |e| e.match /.+\.(css|js|png)/ }.each do |f|
-            type = f.split('.')[-1]
-            type = "img" if type == 'png'
-
-            Dir.mkdir(File.join(destination_dir, type)) unless Dir.exists?(File.join(destination_dir, type))
-
-            FileUtils.cp(File.join(File.dirname(__FILE__), f), File.join(@report_dir, "assets", type, f))
-
-            if type == 'css'
-              tags << "<link type='text/css' rel='stylesheet' href='#{ File.join("assets", type, f) }'>\n"
-            elsif type == 'js'
-              tags << "<script src='#{ File.join("assets", type, f) }' type='text/javascript'></script>\n"
-            end
-          end
-
-          tags
-        end
+        # def asset_tags
+        #   tags = ""
+        #   destination_dir = File.join(@report_dir, "assets")
+        #
+        #   dir = Dir.open(File.dirname(__FILE__))
+        #
+        #   Dir.mkdir(destination_dir) unless Dir.exists?(destination_dir)
+        #
+        #   dir.entries.select { |e| e.match /.+\.(css|js|png)/ }.each do |f|
+        #     type = f.split('.')[-1]
+        #     type = "img" if type == 'png'
+        #
+        #     Dir.mkdir(File.join(destination_dir, type)) unless Dir.exists?(File.join(destination_dir, type))
+        #
+        #     FileUtils.cp(File.join(File.dirname(__FILE__), f), File.join(@report_dir, "assets", type, f))
+        #
+        #     if type == 'css'
+        #       tags << "<link type='text/css' rel='stylesheet' href='#{ File.join("assets", type, f) }'>\n"
+        #     elsif type == 'js'
+        #       tags << "<script src='#{ File.join("assets", type, f) }' type='text/javascript'></script>\n"
+        #     end
+        #   end
+        #
+        #   tags
+        # end
 
         def get_current_category(args)
           path = args[:path].split('/')

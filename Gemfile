@@ -1,5 +1,7 @@
 source :rubygems
 
+gem 'activesupport'
+
 group :development, :test do
   gem "bundler"
   gem "jeweler"

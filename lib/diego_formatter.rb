@@ -1,1 +1,1 @@
-require_relative 'html'
+require_relative 'diego_formatter/html'
