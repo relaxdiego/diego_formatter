@@ -237,7 +237,7 @@ class Html
   def embed(src, mime_type, label)
     case(mime_type)
     when /^image\/(png|gif|jpg|jpeg)/
-      filename = src.split('/')[-1]
+      filename = File.basename(src)
       filepath = File.join(screenshots_dir, filename)
       FileUtils.cp(src, filepath)
 
