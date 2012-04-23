@@ -262,7 +262,8 @@ module Cucumber
               roles.each do |role|
                 # puts "#{ role }: #{ feature_permissions.find{ |p| p.keys[0] == role }[role] }"
                 permission = feature_permissions.find{ |p| p.keys[0] == role }
-                csv << "#{ separator }#{ permission.nil? ? '?' : permission[role] }"
+                permission = permission.nil? ? '?' : permission[role]
+                csv << "#{ separator }#{ permission.center(role.length) }"
               end
               csv << "\n"
             end
@@ -270,7 +271,7 @@ module Cucumber
             roles.length.times { csv << separator }
             csv << "\n"
           end
-
+          puts csv.gsub(',', ' ')
           File.open(File.join(@report_dir, "matrix.csv"), 'w') { |file| file.write(csv) }
           puts "Permission matrix saved as #{@report_dir}/matrix.csv"
         end
