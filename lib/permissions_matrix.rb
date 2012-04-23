@@ -228,8 +228,11 @@ module Cucumber
           @results.each do |category_name, category|
             category.each do |feature|
               feature[:elements].find{ |e| e[:type]=="Scenario Outline"}[:examples].each do |example|
-                role = example[:rows][1][0][:value]
-                roles << role unless roles.include?(role)
+                example[:rows].delete_at(0)
+                example[:rows].each do |row|
+                  role = row[0][:value]
+                  roles << role unless roles.include?(role)
+                end
               end
             end
           end
@@ -251,7 +254,6 @@ module Cucumber
               csv << feature[:name].ljust(first_column_pad)
               feature_permissions = []
               feature[:elements].find{ |e| e[:type]=="Scenario Outline"}[:examples].each do |example|
-                example[:rows].delete_at(0)
                 example[:rows].each do |row|
                   feature_permissions << { row[0][:value] => (row[1][:value] =~ /^Cannot/ ? '' : 'Y' ) }
                 end
@@ -259,7 +261,8 @@ module Cucumber
               # puts feature_permissions.inspect
               roles.each do |role|
                 # puts "#{ role }: #{ feature_permissions.find{ |p| p.keys[0] == role }[role] }"
-                csv << "#{ separator }#{ feature_permissions.find{ |p| p.keys[0] == role }[role] }"
+                permission = feature_permissions.find{ |p| p.keys[0] == role }
+                csv << "#{ separator }#{ permission.nil? ? '?' : permission[role] }"
               end
               csv << "\n"
             end
